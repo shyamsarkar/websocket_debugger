@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfect 10 Challenge</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --text-main: #0f172a;
+        }
+
+        body { 
+            font-family: 'Inter', system-ui, sans-serif; 
+            background: #e2e8f0; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column;
+            min-height: 100vh;
+            color: var(--text-main);
+        }
+
+        h1 { 
+            text-align: center; 
+            font-size: 3rem; 
+            margin: 20px 0; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* LEFT: JUMBO TIMER SECTION */
+        .game-column {
+            flex: 1.5; /* Larger area for timer */
+            background: white;
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        }
+
+        #timer {
+            font-size: 12rem; /* Extreme visibility for crowds */
+            font-weight: 900;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 20px 0;
+            line-height: 1;
+        }
+
+        .controls button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: 800;
+            transition: all 0.2s;
+            margin: 0 20px;
+            color: white;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        #startStopBtn { background: var(--primary); }
+        #startStopBtn.stop { background: var(--danger); animation: pulse 1s infinite; }
+        #resetBtn { background: #475569; }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        #save-section {
+            margin-top: 40px;
+            width: 80%;
+            text-align: center;
+            display: none;
+        }
+
+        input {
+            padding: 15px;
+            font-size: 1.5rem;
+            border: 3px solid #cbd5e1;
+            border-radius: 12px;
+            width: 60%;
+            margin-bottom: 15px;
+        }
+
+        /* RIGHT: LARGE LEADERBOARD */
+        .leaderboard-column {
+            flex: 1;
+            background: #1e293b; /* Dark theme for contrast */
+            color: white;
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            overflow-y: auto;
+        }
+
+        .leaderboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; padding-bottom: 10px; }
+        h3 { font-size: 2rem; margin: 0; }
+        .btn-clear-all { background: var(--danger); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1.4rem; /* Bigger text for the table */
+        }
+
+        th { text-align: left; padding: 15px; color: #94a3b8; font-size: 1rem; text-transform: uppercase; }
+        td { padding: 20px 15px; border-bottom: 1px solid #334155; }
+
+        .diff-tag {
+            background: var(--success);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-family: monospace;
+        }
+
+        .btn-action {
+            padding: 8px 12px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            margin-left: 5px;
+        }
+        .btn-edit { background: #fbbf24; color: black; }
+        .btn-del { background: #f87171; color: white; }
+
+        @media (max-width: 1000px) {
+            .main-container { flex-direction: column; }
+            #timer { font-size: 8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Perfect 10.000 Challenge</h1>
+
+    <div class="main-container">
+        <!-- LEFT: JUMBO TIMER -->
+        <div class="game-column">
+            <div id="timer">0.000</div>
+            
+            <div class="controls">
+                <button id="startStopBtn">START</button>
+                <button id="resetBtn">RESET</button>
+            </div>
+
+            <div id="save-section">
+                <input type="text" id="playerName" placeholder="Enter Name">
+                <br>
+                <button id="saveBtn" style="background:var(--success); color:white; padding: 15px 30px; border-radius:12px; font-size:1.5rem; border:none; cursor:pointer;">SUBMIT SCORE</button>
+            </div>
+        </div>
+
+        <!-- RIGHT: LEADERBOARD -->
+        <div class="leaderboard-column">
+            <div class="leaderboard-header">
+                <h3>Leaderboard</h3>
+                <button class="btn-clear-all" onclick="clearAll()">Clear All</button>
+            </div>
+            <table id="leaderboard">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Time</th>
+                        <th>Diff</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let startTime, timerInterval;
+        let running = false;
+        let finalTime = 0;
+
+        const timerDisplay = document.getElementById('timer');
+        const startStopBtn = document.getElementById('startStopBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const saveSection = document.getElementById('save-section');
+        const saveBtn = document.getElementById('saveBtn');
+        const playerNameInput = document.getElementById('playerName');
+
+        function updateTimer() {
+            finalTime = (performance.now() - startTime) / 1000;
+            timerDisplay.textContent = finalTime.toFixed(3);
+        }
+
+        startStopBtn.addEventListener('click', () => {
+            if (!running) {
+                startTime = performance.now();
+                timerInterval = setInterval(updateTimer, 10);
+                running = true;
+                startStopBtn.textContent = 'STOP';
+                startStopBtn.classList.add('stop');
+                saveSection.style.display = 'none';
+                timerDisplay.style.color = 'var(--text-main)';
+            } else {
+                clearInterval(timerInterval);
+                running = false;
+                startStopBtn.textContent = 'START';
+                startStopBtn.classList.remove('stop');
+                startStopBtn.disabled = true;
+                saveSection.style.display = 'block';
+                // Change color if they hit it perfectly
+                if(finalTime.toFixed(3) === "10.000") timerDisplay.style.color = "var(--success)";
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            clearInterval(timerInterval);
+            running = false;
+            finalTime = 0;
+            timerDisplay.textContent = "0.000";
+            timerDisplay.style.color = 'var(--text-main)';
+            startStopBtn.textContent = 'START';
+            startStopBtn.disabled = false;
+            saveSection.style.display = 'none';
+        });
+
+        saveBtn.addEventListener('click', () => {
+            const name = playerNameInput.value.trim() || "Anonymous";
+            const diff = Math.abs(10000 - (finalTime * 1000)).toFixed(0);
+            const record = { id: Date.now(), name, score: finalTime.toFixed(3), difference: parseInt(diff) };
+            const scores = JSON.parse(localStorage.getItem('stopwatchScores')) || [];
+            scores.push(record);
+            saveAndRefresh(scores);
+            playerNameInput.value = "";
+            saveSection.style.display = 'none';
+        });
+
+        function deleteScore(id) {
+            if(confirm("Delete this record?")) {
+                let scores = JSON.parse(localStorage.getItem('stopwatchScores')) || [];
+                scores = scores.filter(s => s.id !== id);
+                saveAndRefresh(scores);
+            }
+        }
+
+        function editName(id) {
+            const scores = JSON.parse(localStorage.getItem('stopwatchScores')) || [];
+            const score = scores.find(s => s.id === id);
+            const newName = prompt("Edit player name:", score.name);
+            if (newName !== null) {
+                score.name = newName || "Anonymous";
+                saveAndRefresh(scores);
+            }
+        }
+
+        function clearAll() {
+            if(confirm("Clear all records?")) {
+                localStorage.removeItem('stopwatchScores');
+                displayLeaderboard();
+            }
+        }
+
+        function saveAndRefresh(scores) {
+            scores.sort((a, b) => a.difference - b.difference);
+            localStorage.setItem('stopwatchScores', JSON.stringify(scores));
+            displayLeaderboard();
+        }
+
+        function displayLeaderboard() {
+            const scores = JSON.parse(localStorage.getItem('stopwatchScores')) || [];
+            const topTen = scores.slice(0, 10);
+            const tbody = document.getElementById('leaderboardBody');
+            tbody.innerHTML = topTen.map((s) => `
+                <tr>
+                    <td><strong>${s.name}</strong></td>
+                    <td>${s.score}s</td>
+                    <td><span class="diff-tag">${s.difference}ms</span></td>
+                    <td style="text-align:right">
+                        <button class="btn-action btn-edit" onclick="editName(${s.id})">✎</button>
+                        <button class="btn-action btn-del" onclick="deleteScore(${s.id})">✕</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        displayLeaderboard();
+    </script>
+</body>
+</html>

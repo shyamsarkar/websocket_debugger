@@ -100,7 +100,7 @@ function App() {
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M2 12h4l3-9 5 18 3-9h5" />
           </svg>
-          Action Cable Tester
+          WebSocket Debugger
         </h1>
 
         <div className={`status-badge ${status.toLowerCase().replace('...', '')}`}>

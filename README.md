@@ -1,16 +1,37 @@
-# React + Vite
+# WebSocket Debugger
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A browser-based tool for testing and debugging WebSocket connections, with first-class support for **Rails Action Cable**.
 
-Currently, two official plugins are available:
+![WebSocket Debugger UI](src/assets/hero.png)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- Connect to any WebSocket URL
+- Subscribe to Action Cable channels with custom parameters (e.g. auth tokens, room IDs)
+- View real-time incoming messages in a live data stream
+- Send JSON data to the connected channel
+- Connection status indicators (Connecting, Connected, Disconnected, Rejected)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Getting Started
 
-## Expanding the ESLint configuration
+```bash
+npm install
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Then open [http://localhost:5173](http://localhost:5173).
+
+## Usage
+
+1. Enter your WebSocket URL (default: `ws://localhost:3000/cable`)
+2. Enter the channel name (e.g. `CustomerSupportChannel`)
+3. Add any extra JSON parameters (e.g. `{ "auth_token": "..." }`)
+4. Click **Connect**
+5. Incoming messages appear in the Data Stream panel
+6. Use the send bar to push JSON data to the channel
+
+## Tech Stack
+
+- [React 19](https://react.dev)
+- [Vite](https://vite.dev)
+- [@rails/actioncable](https://www.npmjs.com/package/@rails/actioncable)
